@@ -123,9 +123,10 @@ class Mumble extends Adapter
 		mumbleOptions =
 			pfx:			options.cert
 	  
-    @robot.name = options.nick
+    #@robot.name = options.nick
 	  
-    bot = new Mumble.connect options.path, mumbleOptions, (error, connection) ->
+    #bot = new Mumble.connect options.path, mumbleOptions, (error, connection) ->
+		new Mumble.connect options.path, mumbleOptions, (error, connection) ->
 			throw new Error(error) if error
 			
 			# Authenticate and initialize
