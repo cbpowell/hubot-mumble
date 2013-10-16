@@ -1,8 +1,7 @@
 # Hubot dependencies
 {Robot, Adapter, TextMessage, EnterMessage, LeaveMessage, Response} = require 'hubot'
 
-# node-mumble library
-Mumble = require 'node-mumble'
+Mumble = require 'mumble'
 fs = require 'fs'
 
 class Mumble extends Adapter
