@@ -1,0 +1,26 @@
+{
+  "name": "hubot-mumble",
+  "version": "0.0.1",
+  "author": {
+    "name": "Charles Powell",
+    "email": "cbpowell@gmail.com"
+  },
+  "description": "Mumble adapter for Hubot",
+  "keywords": [
+    "hubot mumble adapter"
+  ],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/nandub/hubot-irc/raw/master/LICENSE"
+    }
+  ],
+  "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+  "main": "./src/mumble.coffee",
+  "engine": "node > 0.6.0",
+  "dependencies": {
+    "mumble": "*"
+  },
+}
