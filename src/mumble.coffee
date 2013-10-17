@@ -1,7 +1,7 @@
 # Hubot dependencies
 {Robot, Adapter, TextMessage, EnterMessage, LeaveMessage, Response} = require 'hubot'
 
-Mumble = require 'mumble'
+Mumbler = require 'mumble'
 fs = require 'fs'
 
 class Mumble extends Adapter
@@ -108,11 +108,12 @@ class Mumble extends Adapter
       throw new Error("HUBOT_IRC_SERVER is not defined: try: export HUBOT_IRC_SERVER='irc.myserver.com'")
 
   run: ->
-    self = @
-
-    # do @checkCanStart
-
-    options =
+		
+		self = @
+		
+		# do @checkCanStart
+		
+		options =
       nick:     process.env.HUBOT_MUMBLE_NICK or @robot.name
       path:     process.env.HUBOT_MUMBLE_PATH
       password: process.env.HUBOT_MUMBLE_PASSWORD
@@ -125,17 +126,18 @@ class Mumble extends Adapter
     #@robot.name = options.nick
 	  
     #bot = new Mumble.connect options.path, mumbleOptions, (error, connection) ->
-		new Mumble.connect options.path, mumbleOptions, (error, connection) ->
+		bot = new Mumbler.connect options.path, mumbleOptions, (error, connection) ->
 			throw new Error(error) if error
 			
 			# Authenticate and initialize
-			connection.authenticate options.nick, options.passwordconnection.on "initialized", ->
+			connection.authenticate options.nick, options.password
+			
+			connection.on "initialized", ->
 				output = connection
 				console.log "Connection initialized"
 				
 			connection.on "user-update", (user) ->
 				console.log "User update:", user
-				console.log "Connection:", output
 				
 			connection.on "user-remove", (user) ->
 				console.log "User removed:", user
