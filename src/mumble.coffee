@@ -97,18 +97,16 @@ class Mumble extends Adapter
     @bot.send command, strings...
 
 
-  ###
 	
 	checkCanStart: ->
-    if not process.env.HUBOT_IRC_NICK and not @robot.name
-      throw new Error("HUBOT_IRC_NICK is not defined; try: export HUBOT_IRC_NICK='mybot'")
-    else if not process.env.HUBOT_IRC_ROOMS
-      throw new Error("HUBOT_IRC_ROOMS is not defined; try: export HUBOT_IRC_ROOMS='#myroom'")
-    else if not process.env.HUBOT_IRC_SERVER
-      throw new Error("HUBOT_IRC_SERVER is not defined: try: export HUBOT_IRC_SERVER='irc.myserver.com'")
-
-
-  
+    if not process.env.HUBOT_MUMBLE_NICK or @robot.name
+      throw new Error("HUBOT_MUMBLE_NICK is not defined; try: export HUBOT_MUMBLE_NICK='mybot'")
+    else if not process.env.HUBOT_MUMBLE_PATH
+      throw new Error("HUBOT_MUMBLE_PATH is not defined; try: export HUBOT_MUMBLE_PATH='mumble://path.to/server'")
+    else if not process.env.HUBOT_MUMBLE_CERTPATH)
+      throw new Error("HUBOT_MUMBLE_CERTPATH is not defined: try: export HUBOT_MUMBLE_CERTPATH='/path/to/cert'")
+	###
+	
 	run: ->
 		
 		self = @
@@ -152,45 +150,7 @@ class Mumble extends Adapter
     @bot = bot
 
     self.emit "connected"
-
-	close: ->
-		@bot.disconnect
-	
-  _getTargetFromEnvelope: (envelope) ->
-    user = null
-    room = null
-    target = null
-
-    # as of hubot 2.4.2, the first param to send() is an object with 'user'
-    # and 'room' data inside. detect the old style here.
-    if envelope.reply_to
-      user = envelope
-    else
-      # expand envelope
-      user = envelope.user
-      room = envelope.room
-
-    if user
-      # most common case - we're replying to a user in a room
-      if user.room
-        target = user.room
-      # reply directly
-      else if user.name
-        target = user.name
-      # replying to pm
-      else if user.reply_to
-        target = user.reply_to
-      # allows user to be an id string
-      else if user.search?(/@/) != -1
-        target = user
-    else if room
-      # this will happen if someone uses robot.messageRoom(jid, ...)
-      target = room
-
-    target
-
-
-
-
+		
+		
 exports.use = (robot) ->
   new Mumble robot
