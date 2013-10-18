@@ -64,7 +64,6 @@ class Mumble extends Adapter
 
       self.receive new LeaveMessage(null)
 
-	###
 	getUserFromName: (name) ->
     return @robot.brain.userForName(name) if @robot.brain?.userForName?
 
@@ -88,7 +87,6 @@ class Mumble extends Adapter
       user.room = null
     user
 	
-	###
   kick: (channel, client, message) ->
     @bot.emit 'raw',
       command: 'KICK'
