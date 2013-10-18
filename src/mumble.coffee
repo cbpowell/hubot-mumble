@@ -64,7 +64,8 @@ class Mumble extends Adapter
 
       self.receive new LeaveMessage(null)
 
-  getUserFromName: (name) ->
+	###
+	getUserFromName: (name) ->
     return @robot.brain.userForName(name) if @robot.brain?.userForName?
 
     return @userForName name
@@ -86,7 +87,8 @@ class Mumble extends Adapter
     else
       user.room = null
     user
-
+	
+	###
   kick: (channel, client, message) ->
     @bot.emit 'raw',
       command: 'KICK'
@@ -107,7 +109,9 @@ class Mumble extends Adapter
     else if not process.env.HUBOT_IRC_SERVER
       throw new Error("HUBOT_IRC_SERVER is not defined: try: export HUBOT_IRC_SERVER='irc.myserver.com'")
 
-  run: ->
+
+  
+	run: ->
 		
 		self = @
 		
@@ -133,19 +137,27 @@ class Mumble extends Adapter
 			connection.authenticate options.nick, options.password
 			
 			connection.on "initialized", ->
-				output = connection
+				@emit "connected"
 				console.log "Connection initialized"
 				
 			connection.on "user-update", (user) ->
 				console.log "User update:", user
+				mumUser = @robot.brain.userForId user.session, user
+				@receive new EnterMessage mumUser, null
+				
 				
 			connection.on "user-remove", (user) ->
 				console.log "User removed:", user
+				mumUser = @robot.brain.userForId user.session
+				@receive new LeaveMessage mumUser, null
 
     @bot = bot
 
     self.emit "connected"
 
+	close: ->
+		@bot.disconnect
+	
   _getTargetFromEnvelope: (envelope) ->
     user = null
     room = null
