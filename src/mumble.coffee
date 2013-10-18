@@ -4,7 +4,7 @@
 Mumbler = require 'mumble'
 fs = require 'fs'
 
-class Mumble extends Adapter
+class MumbleBot extends Adapter
   ### 
 	send: (envelope, strings...) ->
     target = @_getTargetFromEnvelope envelope
@@ -106,51 +106,47 @@ class Mumble extends Adapter
     else if not process.env.HUBOT_MUMBLE_CERTPATH)
       throw new Error("HUBOT_MUMBLE_CERTPATH is not defined: try: export HUBOT_MUMBLE_CERTPATH='/path/to/cert'")
 	###
-	
-	run: ->
-		
-		self = @
-		
-		# do @checkCanStart
-		
-		options =
+
+  run: ->
+    self = @
+    
+    #do @checkCanStart
+      
+    @robot.name = process.env.HUBOT_MUMBLE_NICK
+    
+    options =
       nick:     process.env.HUBOT_MUMBLE_NICK or @robot.name
       path:     process.env.HUBOT_MUMBLE_PATH
       password: process.env.HUBOT_MUMBLE_PASSWORD
       cert:			fs.readFileSync(process.env.HUBOT_MUMBLE_CERTPATH)
-      debug:    process.env.HUBOT_IRC_DEBUG?
+      debug:    process.env.HUBOT_IRC_DEBUG
+    
+    mumbleOptions =
+      pfx:  options.cert
+    
+    bot = new Mumbler.connect options.path, mumbleOptions, (error, connection) ->
+      throw new Error(error) if error
 			
-		mumbleOptions =
-			pfx:			options.cert
-	  
-    #@robot.name = options.nick
-	  
-    #bot = new Mumble.connect options.path, mumbleOptions, (error, connection) ->
-		bot = new Mumbler.connect options.path, mumbleOptions, (error, connection) ->
-			throw new Error(error) if error
+      # Authenticate and initialize
+      connection.authenticate options.nick, options.password
+      
+      connection.on "initialized", ->
+        @emit "connected"
+        console.log "Connection initialized"
 			
-			# Authenticate and initialize
-			connection.authenticate options.nick, options.password
-			
-			connection.on "initialized", ->
-				@emit "connected"
-				console.log "Connection initialized"
-				
-			connection.on "user-update", (user) ->
-				console.log "User update:", user
-				mumUser = @robot.brain.userForId user.session, user
-				@receive new EnterMessage mumUser, null
-				
-				
-			connection.on "user-remove", (user) ->
-				console.log "User removed:", user
-				mumUser = @robot.brain.userForId user.session
-				@receive new LeaveMessage mumUser, null
-
+      connection.on "user-update", (user) ->
+        console.log "User update:", user
+        mumUser = @robot.brain.userForId user.session, user
+        @receive new EnterMessage mumUser, null
+      
+      connection.on "user-remove", (user) ->
+        console.log "User removed:", user
+        mumUser = @robot.brain.userForId user.session
+        @receive new LeaveMessage mumUser, null
+    
     @bot = bot
-
+    
     self.emit "connected"
 		
-		
 exports.use = (robot) ->
-  new Mumble robot
+  new MumbleBot robot
