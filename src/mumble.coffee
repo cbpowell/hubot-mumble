@@ -136,13 +136,15 @@ class MumbleBot extends Adapter
 			
       connection.on "user-update", (user) ->
         console.log "User update:", user
-        mumUser = @robot.brain.userForId user.session, user
-        @receive new EnterMessage mumUser, null
+        if @robot.brain?
+          mumUser = @robot.brain.userForId user.session, user
+          @receive new EnterMessage mumUser, null
       
       connection.on "user-remove", (user) ->
         console.log "User removed:", user
-        mumUser = @robot.brain.userForId user.session
-        @receive new LeaveMessage mumUser, null
+        if @robot.brain?
+          mumUser = @robot.brain.userForId user.session
+          @receive new LeaveMessage mumUser, null
     
     @bot = bot
     
