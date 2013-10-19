@@ -106,6 +106,20 @@ class MumbleBot extends Adapter
     else if not process.env.HUBOT_MUMBLE_CERTPATH)
       throw new Error("HUBOT_MUMBLE_CERTPATH is not defined: try: export HUBOT_MUMBLE_CERTPATH='/path/to/cert'")
 	###
+  
+  userJoined: (user) ->
+    console.log "User update:", user
+    mumUser = @robot.brain.userForId user.session, user
+    if mumUser?
+      console.log "Existing user!"
+    @receive new EnterMessage mumUser, null
+      
+  userDeparted: (user) ->
+    console.log "User removed:", user
+    mumUser = @robot.brain.userForId user.session
+    if mumUser?
+      console.log "Existing user!"
+    @receive new LeaveMessage mumUser, null
 
   run: ->
     self = @
@@ -131,24 +145,16 @@ class MumbleBot extends Adapter
       connection.authenticate options.nick, options.password
       
       connection.on "initialized", ->
-        @emit "connected"
+        self.emit "connected"
         console.log "Connection initialized"
 			
       connection.on "user-update", (user) ->
-        console.log "User update:", user
-        if @robot.brain?
-          mumUser = @robot.brain.userForId user.session, user
-          @receive new EnterMessage mumUser, null
+        self.userJoined user
       
       connection.on "user-remove", (user) ->
-        console.log "User removed:", user
-        if @robot.brain?
-          mumUser = @robot.brain.userForId user.session
-          @receive new LeaveMessage mumUser, null
+        self.userDeparted user
     
     @bot = bot
-    
-    self.emit "connected"
 		
 exports.use = (robot) ->
   new MumbleBot robot
