@@ -107,19 +107,21 @@ class MumbleBot extends Adapter
       throw new Error("HUBOT_MUMBLE_CERTPATH is not defined: try: export HUBOT_MUMBLE_CERTPATH='/path/to/cert'")
 	###
   
-  userJoined: (user) ->
+  userJoined: (user, channel) ->
     console.log "User update:", user
-    mumUser = @robot.brain.userForId user.session, user
-    if mumUser?
-      console.log "Existing user!"
-    @receive new EnterMessage mumUser, null
+    mumUser = @robot.brain.userForId user.session
+    if channel.name is mumUser.room
+      return
+    
+    mumUser.name = user.name
+    mumUser.room = channel.name
+    @receive new EnterMessage(mumUser)
       
   userDeparted: (user) ->
     console.log "User removed:", user
     mumUser = @robot.brain.userForId user.session
-    if mumUser?
-      console.log "Existing user!"
-    @receive new LeaveMessage mumUser, null
+    mumUser.room = null
+    @receive new LeaveMessage(mumUser)
 
   run: ->
     self = @
@@ -138,7 +140,7 @@ class MumbleBot extends Adapter
     mumbleOptions =
       pfx:  options.cert
     
-    bot = new Mumbler.connect options.path, mumbleOptions, (error, connection) ->
+    kickoff = new Mumbler.connect options.path, mumbleOptions, (error, connection) ->
       throw new Error(error) if error
 			
       # Authenticate and initialize
@@ -149,12 +151,11 @@ class MumbleBot extends Adapter
         console.log "Connection initialized"
 			
       connection.on "user-update", (user) ->
-        self.userJoined user
+        channel = connection.channels[user.channelId]
+        self.userJoined user, channel
       
       connection.on "user-remove", (user) ->
         self.userDeparted user
     
-    @bot = bot
-		
 exports.use = (robot) ->
   new MumbleBot robot
