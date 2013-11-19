@@ -121,6 +121,7 @@ class MumbleBot extends Adapter
     console.log "User removed:", user
     mumUser = @robot.brain.userForId user.session
     mumUser.room = null
+    delete @robot.brain.users[user.session]
     @receive new LeaveMessage(mumUser)
 
   run: ->
