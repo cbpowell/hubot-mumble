@@ -109,19 +109,25 @@ class MumbleBot extends Adapter
   
   userJoined: (user, channel) ->
     console.log "User update:", user
-    mumUser = @robot.brain.userForId user.session
+    # Check if there is already a user with this name
+    mumUser = @robot.brain.userForId(user.name)
     if channel.name is mumUser.room
+      # Do nothing if the user is already in the channel
       return
     
+    # Update the user (new or existing) with the new data
     mumUser.name = user.name
     mumUser.room = channel.name
     @receive new EnterMessage(mumUser)
       
   userDeparted: (user) ->
     console.log "User removed:", user
-    mumUser = @robot.brain.userForId user.session
+    # Get the user object for the departing user
+    mumUser = @robot.brain.userForId(user.name)
+    # Set their room info to null
     mumUser.room = null
-    delete @robot.brain.users[user.session]
+    # Delete the user
+    delete @robot.brain.users[user.name]
     @receive new LeaveMessage(mumUser)
 
   run: ->
