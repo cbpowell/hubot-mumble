@@ -5,6 +5,9 @@ Mumbler = require 'mumble'
 fs = require 'fs'
 
 class MumbleBot extends Adapter
+  
+  @connection = null
+  
   ### 
 	send: (envelope, strings...) ->
     target = @_getTargetFromEnvelope envelope
@@ -155,6 +158,7 @@ class MumbleBot extends Adapter
       
       connection.on "initialized", ->
         self.emit "connected"
+        @connection = connection
         console.log "Connection initialized"
 			
       connection.on "user-update", (user) ->
